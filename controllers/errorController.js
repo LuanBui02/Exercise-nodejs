@@ -5,7 +5,7 @@ const handleCastError = (err) => {
   return new HandleException(message, 400);
 };
 const handleDuplicate = (err) => {
-  const message = `The name is duplicate. Please try another name`;
+  const message = `The email is duplicate. Please try another email`;
 
   return new HandleException(message, 400);
 };
@@ -14,6 +14,16 @@ const handleValidate = (err) => {
   const errors = Object.values(err.errors).map((el) => el.message);
 
   const message = `Invalid input data. ${errors.join('. ')}`;
+  return new HandleException(message, 400);
+};
+const handleTokenError = (err) => {
+  const message = `Invalid signature`;
+
+  return new HandleException(message, 400);
+};
+const handleTokenExpired = (err) => {
+  const message = `Your token is expired, please login again!!`;
+
   return new HandleException(message, 400);
 };
 const sendErrorDev = (err, res) => {
@@ -36,21 +46,25 @@ const sendErrorPro = (err, res) => {
       status: 'Error',
       message: 'Something is wrong!!!',
     });
+    console.log(err.name);
   }
 };
 module.exports = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 400;
+  err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
   if (process.env.NODE_ENV === 'development') {
     let error = err;
     if (err.name === 'CastError') error = handleCastError(error);
     if (err.code === 11000) error = handleDuplicate(error);
+    if (err.name === 'JsonWebTokenError') error = handleTokenError(error);
     sendErrorDev(error, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = err;
     if (err.name === 'CastError') error = handleCastError(error);
     if (err.code === 11000) error = handleDuplicate(error);
     if (err.name === 'ValidationError') error = handleValidate(error);
+    if (err.name === 'JsonWebTokenError') error = handleTokenError(error);
+    if (err.name === 'TokenExpiredError') error = handleTokenExpired(error);
     sendErrorPro(error, res);
   }
 };
