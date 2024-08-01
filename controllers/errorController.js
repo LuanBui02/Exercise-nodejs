@@ -46,7 +46,7 @@ const sendErrorPro = (err, res) => {
       status: 'Error',
       message: 'Something is wrong!!!',
     });
-    console.log(err.name);
+    console.log(err);
   }
 };
 module.exports = (err, req, res, next) => {
@@ -57,6 +57,8 @@ module.exports = (err, req, res, next) => {
     if (err.name === 'CastError') error = handleCastError(error);
     if (err.code === 11000) error = handleDuplicate(error);
     if (err.name === 'JsonWebTokenError') error = handleTokenError(error);
+    if (err.name === 'TokenExpiredError') error = handleTokenExpired(error);
+    if (err.name === 'ValidationError') error = handleValidate(error);
     sendErrorDev(error, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = err;

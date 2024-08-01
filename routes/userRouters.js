@@ -8,9 +8,24 @@ usersRoute.post('/signup', authController.signup);
 usersRoute.post('/login', authController.login);
 usersRoute.post('/forgotPassword', authController.forgetPassword);
 usersRoute.patch('/resetPassword/:token', authController.resetPassword);
+usersRoute.patch(
+  '/updatePassword',
+  authController.protect,
+  authController.updatePassword,
+);
+usersRoute.patch(
+  '/updateUserData',
+  authController.protect,
+  userController.updateData,
+);
+usersRoute.delete(
+  '/deleteUserData',
+  authController.protect,
+  userController.deleteUser,
+);
 usersRoute
   .route('/')
-  .get(userController.findAllUsers)
+  .get(authController.protect, userController.findAllUsers)
   .post(userController.addUser);
 usersRoute
   .route('/:id')
